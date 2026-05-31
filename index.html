@@ -2,23 +2,86 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>App Multimédia Pro</title>
     <style>
-        body { background-color: #2b2b2b; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; overflow-x: hidden; }
-        #container { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; padding-bottom: 100px; }
-        .row { display: flex; gap: 15px; }
+        body { 
+            background-color: #2b2b2b; 
+            color: white; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 10px; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+        #container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            width: 100%; 
+            align-items: center; 
+            padding-bottom: 80px; 
+        }
+        .row { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+        }
         .btn {
-            width: 80px; height: 80px; background: #444; border: 2px solid #666;
-            color: white; border-radius: 10px; cursor: pointer; display: flex; 
-            align-items: center; justify-content: center; text-align: center; 
-            font-size: 0.7em; background-size: cover; background-position: center;
+            width: 40px;        /* 50% de 80px */
+            height: 40px;       /* 50% de 80px */
+            background: #444; 
+            border: 2px solid #666;
+            color: white; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            font-size: 0.6em; 
+            background-size: cover; 
+            background-position: center;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            border-color: #a71d2a;
+            font-size: 1.2em;
+            font-weight: bold;
         }
         .son-rempli { color: #39FF14 !important; font-weight: bold; border-color: #39FF14 !important; }
-        .action-btns { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 30px; }
-        #playBtn, #ambianceBtn { padding: 12px 40px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; width: 200px; }
+        .action-btns { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            align-items: center; 
+            margin-top: 20px; 
+            width: 100%;
+        }
+        #playBtn, #ambianceBtn, #undoBtn, #resetBtn { 
+            padding: 8px 16px; 
+            border: none; 
+            border-radius: 5px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 160px; 
+            font-size: 0.9rem;
+        }
         #playBtn { background: #28a745; }
         #ambianceBtn { background: #6f42c1; }
+        #undoBtn { background: #ffc107; color: black; }
+        #resetBtn { background: #dc3545; }
+        .action-row { 
+            display: flex; 
+            gap: 8px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            margin-top: 10px; 
+        }
         
         .fullscreen-mode { background-color: black !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
         .fullscreen-mode #container, .fullscreen-mode .action-btns { display: none !important; }
@@ -39,9 +102,58 @@
         }
         .letter { display: inline-block; min-width: 0.5em; }
         
-        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; padding: 20px; border-radius: 10px; z-index: 20000; }
-        #modal textarea { width: 250px; height: 100px; margin-bottom: 10px; }
-        footer { position: fixed; bottom: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 10000; }
+        #modal { 
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: #333; 
+            padding: 15px; 
+            border-radius: 10px; 
+            z-index: 20000; 
+            width: 80%;
+            max-width: 300px;
+        }
+        #modal textarea { 
+            width: 100%; 
+            height: 80px; 
+            margin-bottom: 8px; 
+            box-sizing: border-box;
+        }
+        #modal button {
+            margin: 4px;
+            padding: 6px 12px;
+        }
+        footer { 
+            position: fixed; 
+            bottom: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+            z-index: 10000; 
+        }
+        footer img {
+            width: 40px;
+            cursor: pointer;
+        }
+        /* Ajustement pour très petits écrans */
+        @media (max-width: 480px) {
+            .btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.55em;
+            }
+            .row {
+                gap: 6px;
+            }
+            #playBtn, #ambianceBtn, #undoBtn, #resetBtn {
+                width: 140px;
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
     </style>
 
 <link rel="manifest" href="manifest.json">
@@ -62,38 +174,459 @@
         <button id="playBtn" onclick="lancerSequence()">PLAY</button>
         <button id="ambianceBtn" onclick="document.getElementById('ambianceInput').click()">Ambiance (Son)</button>
         <input type="file" id="ambianceInput" accept="audio/*" style="display:none" onchange="handleAmbiance(this)">
+        <div class="action-row">
+            <button id="undoBtn" onclick="undoLastAction()">↩️ Annuler</button>
+            <button id="resetBtn" onclick="resetConfirm()">🗑️ Reset</button>
+        </div>
     </div>
 
     <footer>
-        <img src="https://i.ibb.co/VWpZCsDr/dfg-1.png" alt="dfg-1" style="width: 60px; cursor: pointer;" onclick="togglePlayPause()" oncontextmenu="exitApp(event)">
+        <img src="https://i.ibb.co/VWpZCsDr/dfg-1.png" alt="dfg-1" onclick="()=>{}" oncontextmenu="exitApp(event)">
     </footer>
 
     <script>
-        let sequences = [];
+        let sequences = [];       // chaque élément: { id, mode, text, imgKey, audioKey, imgUrl, audioUrl, audio }
         let ambianceAudio = null;
         let currentAudio = null;
         let activeId = null;
         let typingTimeout = null;
+        let isPlaying = false;
+        let sequenceAborted = false;
+        
+        // Historique
+        let historyStack = [];
+        let historyIndex = -1;
+        let pendingReset = false;
+        let resetTimer = null;
 
-        function togglePlayPause() {
-            if (!currentAudio) return;
-            currentAudio.paused ? currentAudio.play() : currentAudio.pause();
+        // IndexedDB
+        const DB_NAME = 'MultimediaAppDB';
+        const STORE_NAME = 'media';
+        let db = null;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve();
+                };
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+            });
         }
 
-        function exitApp(e) {
-            if(e) e.preventDefault();
+        async function storeBlob(blob, type) {
+            if (!db) await openDB();
+            const key = `${type}_${Date.now()}_${Math.random()}`;
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.put(blob, key);
+                request.onsuccess = () => resolve(key);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function getBlob(key) {
+            if (!db) await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function deleteBlob(key) {
+            if (!db) await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.delete(key);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveToLocalStorage() {
+            const saveData = sequences.map(seq => ({
+                id: seq.id,
+                mode: seq.mode,
+                text: seq.text,
+                imgKey: seq.imgKey || null,
+                audioKey: seq.audioKey || null
+            }));
+            localStorage.setItem('multimediaApp', JSON.stringify(saveData));
+        }
+
+        async function loadFromLocalStorage() {
+            const data = localStorage.getItem('multimediaApp');
+            if (!data) return false;
+            try {
+                const loaded = JSON.parse(data);
+                if (!Array.isArray(loaded)) return false;
+                document.getElementById('container').innerHTML = '';
+                sequences = [];
+                for (let item of loaded) {
+                    const seq = {
+                        id: item.id,
+                        mode: item.mode || "Son",
+                        text: item.text || "",
+                        imgKey: item.imgKey,
+                        audioKey: item.audioKey,
+                        imgUrl: null,
+                        audioUrl: null,
+                        audio: null
+                    };
+                    if (seq.imgKey) {
+                        const blob = await getBlob(seq.imgKey);
+                        if (blob) {
+                            seq.imgUrl = URL.createObjectURL(blob);
+                        }
+                    }
+                    if (seq.audioKey) {
+                        const blob = await getBlob(seq.audioKey);
+                        if (blob) {
+                            seq.audioUrl = URL.createObjectURL(blob);
+                            seq.audio = new Audio(seq.audioUrl);
+                        }
+                    }
+                    sequences.push(seq);
+                }
+                rebuildDOM();
+                return true;
+            } catch(e) { return false; }
+        }
+
+        function rebuildDOM() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            sequences.forEach((seq, idx) => {
+                seq.id = idx;
+                const row = document.createElement('div');
+                row.className = 'row';
+                row.id = `row_${idx}`;
+                row.innerHTML = `
+                    <button class="btn" id="btnM${idx}" onclick="cycleMode(${idx})">${seq.mode}</button>
+                    <button class="btn" onclick="ouvrirModal(${idx})">TXT</button>
+                    <button class="btn" id="btnI${idx}" onclick="document.getElementById('i${idx}').click()" style="${seq.imgUrl ? 'background-image: url(' + seq.imgUrl + ')' : ''}"></button>
+                    <button class="btn" id="btnA${idx}" onclick="document.getElementById('a${idx}').click()">${seq.audio ? '🔊' : '🔊'}</button>
+                    <button class="btn delete-btn" onclick="deleteRow(${idx})">✖</button>
+                    <input type="file" id="i${idx}" accept="image/*" multiple style="display:none" onchange="handleFile(this, ${idx}, 'img')">
+                    <input type="file" id="a${idx}" accept="audio/*" style="display:none" onchange="handleFile(this, ${idx}, 'audio')">
+                `;
+                if (seq.audio) {
+                    const btnA = row.querySelector(`#btnA${idx}`);
+                    if (btnA) btnA.classList.add('son-rempli');
+                }
+                container.appendChild(row);
+            });
+        }
+
+        function addRowToDOM(seq) {
+            const id = seq.id;
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.id = `row_${id}`;
+            row.innerHTML = `
+                <button class="btn" id="btnM${id}" onclick="cycleMode(${id})">${seq.mode}</button>
+                <button class="btn" onclick="ouvrirModal(${id})">TXT</button>
+                <button class="btn" id="btnI${id}" onclick="document.getElementById('i${id}').click()" style="${seq.imgUrl ? 'background-image: url(' + seq.imgUrl + ')' : ''}"></button>
+                <button class="btn" id="btnA${id}" onclick="document.getElementById('a${id}').click()">${seq.audio ? '🔊' : '🔊'}</button>
+                <button class="btn delete-btn" onclick="deleteRow(${id})">✖</button>
+                <input type="file" id="i${id}" accept="image/*" multiple style="display:none" onchange="handleFile(this, ${id}, 'img')">
+                <input type="file" id="a${id}" accept="audio/*" style="display:none" onchange="handleFile(this, ${id}, 'audio')">
+            `;
+            if (seq.audio) {
+                const btnA = row.querySelector(`#btnA${id}`);
+                if (btnA) btnA.classList.add('son-rempli');
+            }
+            document.getElementById('container').appendChild(row);
+        }
+
+        function createRow() {
+            pushToHistory();
+            const id = sequences.length;
+            const newSeq = {
+                id: id,
+                mode: "Son",
+                text: "",
+                imgKey: null,
+                audioKey: null,
+                imgUrl: null,
+                audioUrl: null,
+                audio: null
+            };
+            sequences.push(newSeq);
+            addRowToDOM(newSeq);
+            saveToLocalStorage();
+        }
+
+        async function createRowWithImage(blob) {
+            pushToHistory();
+            const id = sequences.length;
+            const imgKey = await storeBlob(blob, 'img');
+            const imgUrl = URL.createObjectURL(blob);
+            const newSeq = {
+                id: id,
+                mode: "Son",
+                text: "",
+                imgKey: imgKey,
+                audioKey: null,
+                imgUrl: imgUrl,
+                audioUrl: null,
+                audio: null
+            };
+            sequences.push(newSeq);
+            addRowToDOM(newSeq);
+            saveToLocalStorage();
+        }
+
+        async function deleteRow(id) {
+            if (isPlaying) return;
+            pushToHistory();
+            const seqToDelete = sequences[id];
+            if (!seqToDelete) return;
+            if (seqToDelete.imgKey) {
+                await deleteBlob(seqToDelete.imgKey);
+                if (seqToDelete.imgUrl) URL.revokeObjectURL(seqToDelete.imgUrl);
+            }
+            if (seqToDelete.audioKey) {
+                await deleteBlob(seqToDelete.audioKey);
+                if (seqToDelete.audioUrl) URL.revokeObjectURL(seqToDelete.audioUrl);
+                if (seqToDelete.audio) seqToDelete.audio.pause();
+            }
+            sequences.splice(id, 1);
+            rebuildDOM();
+            saveToLocalStorage();
+        }
+
+        async function removeLastEmptyRow() {
+            if (sequences.length === 0) return false;
+            const last = sequences[sequences.length - 1];
+            if (!last.imgKey && !last.audioKey && last.text === "") {
+                await deleteRow(last.id);
+                return true;
+            }
+            return false;
+        }
+
+        async function handleFile(input, id, type) {
+            if (!input.files || input.files.length === 0) return;
+            const files = Array.from(input.files);
+            
+            if (files.length > 1 && type === 'img') {
+                pushToHistory();
+                await removeLastEmptyRow();
+                for (let file of files) {
+                    await createRowWithImage(file);
+                }
+                createRow();
+                return;
+            }
+            
+            const file = files[0];
+            if (type === 'img') {
+                pushToHistory();
+                const seq = sequences[id];
+                if (seq.imgKey) {
+                    await deleteBlob(seq.imgKey);
+                    if (seq.imgUrl) URL.revokeObjectURL(seq.imgUrl);
+                }
+                const imgKey = await storeBlob(file, 'img');
+                const imgUrl = URL.createObjectURL(file);
+                seq.imgKey = imgKey;
+                seq.imgUrl = imgUrl;
+                document.getElementById(`btnI${id}`).style.backgroundImage = `url(${imgUrl})`;
+                saveToLocalStorage();
+            } else if (type === 'audio') {
+                pushToHistory();
+                const seq = sequences[id];
+                if (seq.audioKey) {
+                    await deleteBlob(seq.audioKey);
+                    if (seq.audioUrl) URL.revokeObjectURL(seq.audioUrl);
+                    if (seq.audio) seq.audio.pause();
+                }
+                const audioKey = await storeBlob(file, 'audio');
+                const audioUrl = URL.createObjectURL(file);
+                seq.audioKey = audioKey;
+                seq.audioUrl = audioUrl;
+                seq.audio = new Audio(audioUrl);
+                document.getElementById(`btnA${id}`).classList.add('son-rempli');
+                document.getElementById(`btnA${id}`).innerText = "🔊";
+                saveToLocalStorage();
+            }
+        }
+
+        function handleAmbiance(input) {
+            if (!input.files[0]) return;
+            if (ambianceAudio) ambianceAudio.pause();
+            ambianceAudio = new Audio(URL.createObjectURL(input.files[0]));
+            ambianceAudio.loop = true;
+            ambianceAudio.preload = "auto";
+            document.getElementById('ambianceBtn').classList.add('son-rempli');
+            document.getElementById('ambianceBtn').innerText = "Ambiance OK";
+        }
+
+        function pushToHistory() {
+            if (isPlaying) return;
+            const state = sequences.map(seq => ({
+                id: seq.id,
+                mode: seq.mode,
+                text: seq.text,
+                imgKey: seq.imgKey,
+                audioKey: seq.audioKey
+            }));
+            historyStack = historyStack.slice(0, historyIndex + 1);
+            historyStack.push(state);
+            historyIndex++;
+            if (historyStack.length > 50) historyStack.shift();
+        }
+
+        async function restoreFromHistory(state) {
+            if (!state) return;
+            for (let seq of sequences) {
+                if (seq.imgUrl) URL.revokeObjectURL(seq.imgUrl);
+                if (seq.audioUrl) URL.revokeObjectURL(seq.audioUrl);
+                if (seq.audio) seq.audio.pause();
+            }
+            sequences = [];
+            for (let item of state) {
+                let imgUrl = null;
+                if (item.imgKey) {
+                    const blob = await getBlob(item.imgKey);
+                    if (blob) imgUrl = URL.createObjectURL(blob);
+                }
+                let audioUrl = null;
+                let audioObj = null;
+                if (item.audioKey) {
+                    const blob = await getBlob(item.audioKey);
+                    if (blob) {
+                        audioUrl = URL.createObjectURL(blob);
+                        audioObj = new Audio(audioUrl);
+                    }
+                }
+                const seq = {
+                    id: item.id,
+                    mode: item.mode,
+                    text: item.text,
+                    imgKey: item.imgKey,
+                    audioKey: item.audioKey,
+                    imgUrl: imgUrl,
+                    audioUrl: audioUrl,
+                    audio: audioObj
+                };
+                sequences.push(seq);
+            }
+            rebuildDOM();
+            saveToLocalStorage();
+        }
+
+        function undoLastAction() {
+            if (isPlaying) return;
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreFromHistory(historyStack[historyIndex]);
+            }
+        }
+
+        async function resetConfirm() {
+            if (pendingReset) {
+                if (resetTimer) clearTimeout(resetTimer);
+                pendingReset = false;
+                pushToHistory();
+                for (let seq of sequences) {
+                    if (seq.imgKey) await deleteBlob(seq.imgKey);
+                    if (seq.audioKey) await deleteBlob(seq.audioKey);
+                    if (seq.imgUrl) URL.revokeObjectURL(seq.imgUrl);
+                    if (seq.audioUrl) URL.revokeObjectURL(seq.audioUrl);
+                    if (seq.audio) seq.audio.pause();
+                }
+                sequences = [];
+                document.getElementById('container').innerHTML = '';
+                createRow();
+                saveToLocalStorage();
+                const resetBtn = document.getElementById('resetBtn');
+                const originalText = resetBtn.innerText;
+                resetBtn.innerText = '✓ Réinitialisé !';
+                setTimeout(() => { resetBtn.innerText = originalText; }, 1500);
+            } else {
+                pendingReset = true;
+                const resetBtn = document.getElementById('resetBtn');
+                const originalText = resetBtn.innerText;
+                resetBtn.innerText = '⚠️ Re-cliquez pour confirmer';
+                if (resetTimer) clearTimeout(resetTimer);
+                resetTimer = setTimeout(() => {
+                    if (pendingReset) {
+                        pendingReset = false;
+                        resetBtn.innerText = originalText;
+                    }
+                }, 2000);
+            }
+        }
+
+        function cycleMode(id) {
+            pushToHistory();
+            let btn = document.getElementById(`btnM${id}`);
+            let modes = ["Son", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+            let next = (modes.indexOf(btn.innerText) + 1) % modes.length;
+            btn.innerText = modes[next];
+            sequences[id].mode = modes[next];
+            saveToLocalStorage();
+        }
+
+        function ouvrirModal(id) { 
+            activeId = id; 
+            document.getElementById('txtInput').value = sequences[id].text || ""; 
+            document.getElementById('modal').style.display = 'block'; 
+        }
+        
+        async function collerTexte() { 
+            const text = await navigator.clipboard.readText(); 
+            document.getElementById('txtInput').value = text; 
+        }
+        
+        function validerTexte() { 
+            pushToHistory();
+            sequences[activeId].text = document.getElementById('txtInput').value; 
+            document.getElementById('modal').style.display = 'none';
+            saveToLocalStorage();
+        }
+
+        function togglePlayPause() {}
+        function stopAllAndExit() {
+            if (ambianceAudio) {
+                ambianceAudio.pause();
+                ambianceAudio.currentTime = 0;
+            }
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            clearTimeout(typingTimeout);
             document.body.classList.remove('fullscreen-mode');
             if (document.fullscreenElement) document.exitFullscreen();
             document.getElementById('bgDisplay').style.display = 'none';
+            isPlaying = false;
         }
-
+        function exitApp(e) {
+            if(e) e.preventDefault();
+            sequenceAborted = true;
+            stopAllAndExit();
+        }
         async function typewriter(text) {
-            // Attendre 1 seconde avant de commencer l'écriture
             await new Promise(r => setTimeout(r, 1000));
-            
             const el = document.getElementById('textDisplay');
             el.innerHTML = "";
             for (let i = 0; i < text.length; i++) {
+                if (sequenceAborted) return;
                 const char = text.charAt(i);
                 if (char === '\n') {
                     el.appendChild(document.createElement('br'));
@@ -106,89 +639,68 @@
                 await new Promise(r => typingTimeout = setTimeout(r, 80));
             }
         }
-
-        function ouvrirModal(id) { activeId = id; document.getElementById('txtInput').value = sequences[id].text || ""; document.getElementById('modal').style.display = 'block'; }
-        async function collerTexte() { const text = await navigator.clipboard.readText(); document.getElementById('txtInput').value = text; }
-        function validerTexte() { sequences[activeId].text = document.getElementById('txtInput').value; document.getElementById('modal').style.display = 'none'; }
-
-        function cycleMode(id) {
-            let btn = document.getElementById(`btnM${id}`);
-            let modes = ["Son", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-            let next = (modes.indexOf(btn.innerText) + 1) % modes.length;
-            btn.innerText = modes[next];
-            sequences[id].mode = modes[next];
-        }
-
-        function createRow(imgUrl = null) {
-            const id = sequences.length;
-            sequences.push({img: imgUrl, audio: null, mode: "Son", text: ""});
-            const row = document.createElement('div');
-            row.className = 'row';
-            row.innerHTML = `
-                <button class="btn" id="btnM${id}" onclick="cycleMode(${id})">Son</button>
-                <button class="btn" onclick="ouvrirModal(${id})">TXT</button>
-                <button class="btn" id="btnI${id}" onclick="document.getElementById('i${id}').click()" style="${imgUrl ? 'background-image: url(' + imgUrl + ')' : ''}"></button>
-                <button class="btn" id="btnA${id}" onclick="document.getElementById('a${id}').click()">🔊</button>
-                <input type="file" id="i${id}" accept="image/*" multiple style="display:none" onchange="handleFile(this, ${id}, 'img')">
-                <input type="file" id="a${id}" accept="audio/*" style="display:none" onchange="handleFile(this, ${id}, 'audio')">
-            `;
-            document.getElementById('container').appendChild(row);
-        }
-
-        function handleFile(input, id, type) {
-            if (!input.files || input.files.length === 0) return;
-            if (input.files.length > 1) {
-                if (sequences.length === 1 && !sequences[0].img) { sequences.pop(); document.getElementById('container').innerHTML = ''; }
-                for (let i = 0; i < input.files.length; i++) createRow(URL.createObjectURL(input.files[i]));
+        async function lancerSequence() {
+            sequenceAborted = true;
+            stopAllAndExit();
+            await new Promise(r => setTimeout(r, 150));
+            const textEl = document.getElementById('textDisplay');
+            textEl.innerHTML = "";
+            const bg = document.getElementById('bgDisplay');
+            bg.style.backgroundImage = 'none';
+            bg.style.backgroundColor = 'black';
+            bg.style.opacity = 1;
+            sequenceAborted = false;
+            isPlaying = true;
+            const validSeqs = sequences.filter(s => s.imgUrl !== null);
+            if (validSeqs.length === 0) {
+                isPlaying = false;
                 return;
             }
-            const url = URL.createObjectURL(input.files[0]);
-            if (type === 'img') { sequences[id].img = url; document.getElementById(`btnI${id}`).style.backgroundImage = `url(${url})`; }
-            else { sequences[id].audio = new Audio(url); document.getElementById(`btnA${id}`).classList.add('son-rempli'); document.getElementById(`btnA${id}`).innerText = "🔊"; }
-        }
-
-        function handleAmbiance(input) {
-            if (!input.files[0]) return;
-            ambianceAudio = new Audio(URL.createObjectURL(input.files[0]));
-            ambianceAudio.loop = true;
-            document.getElementById('ambianceBtn').classList.add('son-rempli');
-            document.getElementById('ambianceBtn').innerText = "Ambiance OK";
-        }
-
-        async function lancerSequence() {
-            const validSeqs = sequences.filter(s => s.img !== null);
-            if (validSeqs.length === 0) return;
-            
-            document.getElementById('bgDisplay').style.display = 'block';
-            document.documentElement.requestFullscreen();
+            bg.style.display = 'block';
             document.body.classList.add('fullscreen-mode');
-
+            await document.documentElement.requestFullscreen();
             await new Promise(r => setTimeout(r, 5000));
-
-            if (ambianceAudio) { ambianceAudio.currentTime = 0; ambianceAudio.volume = 0.25; ambianceAudio.play(); }
-
+            if (sequenceAborted) { stopAllAndExit(); return; }
+            if (ambianceAudio) { 
+                ambianceAudio.currentTime = 0; 
+                ambianceAudio.volume = 0.25; 
+                ambianceAudio.play().catch(e=>console.log);
+            }
             for (let seq of validSeqs) {
+                if (sequenceAborted) break;
                 clearTimeout(typingTimeout);
-                document.getElementById('textDisplay').innerHTML = "";
-                document.getElementById('bgDisplay').style.backgroundImage = `url(${seq.img})`;
-                document.getElementById('bgDisplay').style.opacity = 1;
-                
-                if(seq.text) await typewriter(seq.text);
-                
+                textEl.innerHTML = "";
+                bg.style.backgroundImage = `url(${seq.imgUrl})`;
+                bg.style.opacity = 1;
+                if(seq.text && !sequenceAborted) await typewriter(seq.text);
+                if (sequenceAborted) break;
                 if (seq.mode === "Son" && seq.audio) {
                     currentAudio = seq.audio;
-                    await new Promise(r => { seq.audio.onended = r; seq.audio.play(); });
+                    await new Promise(r => { 
+                        seq.audio.onended = r; 
+                        seq.audio.play().catch(e=>console.log);
+                    });
                 } else {
                     let delay = seq.mode === "Son" ? 3000 : parseInt(seq.mode) * 1000;
                     await new Promise(r => setTimeout(r, delay));
                 }
-                document.getElementById('bgDisplay').style.opacity = 0;
+                if (sequenceAborted) break;
+                bg.style.opacity = 0;
                 await new Promise(r => setTimeout(r, 1000));
             }
-            if (ambianceAudio) ambianceAudio.pause();
-            exitApp();
+            if (ambianceAudio && !sequenceAborted) ambianceAudio.pause();
+            if (!sequenceAborted) stopAllAndExit();
+            else isPlaying = false;
         }
-        createRow();
+
+        (async () => {
+            await openDB();
+            const loaded = await loadFromLocalStorage();
+            if (!loaded) {
+                createRow();
+            }
+            pushToHistory();
+        })();
     </script>
 
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
