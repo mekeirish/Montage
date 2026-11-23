@@ -498,7 +498,7 @@ document.getElementById('filesContainer').addEventListener('click', event => {
         return;
     }
 
-    const { action, url, folder, name, sha } = btn.dataset;
+    const { action, url, folder, name, sha, path } = btn.dataset;
     if (action === 'copy') copyUrl(url);
     else if (action === 'download') downloadFile(url, name, btn);
     else if (action === 'base64') copyAsBase64(url, btn);
@@ -506,6 +506,7 @@ document.getElementById('filesContainer').addEventListener('click', event => {
     else if (action === 'play') toggleAudioPlay(btn);
     else if (action === 'toggle') toggleAudioDetails(btn);
     else if (action === 'tile') onTileClick(btn);
+    else if (action === 'rename') renameOneFile(path);
 });
 // Miniatures : appui long (0,5 s) = détails, clavier Entrée / Espace = clic
 (() => {
@@ -1042,6 +1043,79 @@ function toggleAudioDetails(btn) {
     if (willOpen) details.classList.remove('hidden');
 
     expandedAudioPath = willOpen ? btn.dataset.path : null;
+}
+// Renomme un seul fichier (bouton Renommer du détail audio), en un seul commit
+async function renameOneFile(path) {
+    if (isRenaming) return;
+
+    const file = allFilesCache.find(f => f.path === path);
+    if (!file) return;
+
+    const { base, ext } = splitName(file.name);
+    const result = await openModal({
+        title: 'Renommer le fichier',
+        message: `Fichier : ${file.name}\nExtension conservée : ${ext || '(aucune)'}\nLes espaces sont remplacés par des tirets.`,
+        withInput: true,
+        defaultValue: base,
+        okText: 'Renommer'
+    });
+    if (!result.ok) return;
+
+    let cleaned = cleanFileName(result.value.trim());
+    if (ext && cleaned.endsWith(ext.toLowerCase())) cleaned = cleaned.slice(0, -ext.length);
+    cleaned = cleaned.replace(/^[.\-_]+|[.\-_]+$/g, '');
+    if (!cleaned) {
+        showToast('Nom invalide.', '⚠️');
+        return;
+    }
+
+    const newName = cleaned + ext;
+    if (newName === file.name) return;
+
+    const newPath = `${file._folder}/${newName}`;
+    if (allFilesCache.some(f => f.path === newPath)) {
+        showToast(`"${newName}" existe déjà dans /${file._folder}/.`, '⚠️');
+        return;
+    }
+
+    isRenaming = true;
+    updateRenameButton();
+
+    try {
+        const apiBase = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
+
+        const ref = await ghRequest(`${apiBase}/git/ref/heads/${BRANCH}`);
+        const headSha = ref.object.sha;
+        const headCommit = await ghRequest(`${apiBase}/git/commits/${headSha}`);
+
+        const newTree = await ghRequest(`${apiBase}/git/trees`, 'POST', {
+            base_tree: headCommit.tree.sha,
+            tree: [
+                { path: file.path, mode: '100644', type: 'blob', sha: null },
+                { path: newPath, mode: '100644', type: 'blob', sha: file.sha }
+            ]
+        });
+
+        const newCommit = await ghRequest(`${apiBase}/git/commits`, 'POST', {
+            message: `Rename ${file.name} to ${newName} via Filebase PWA`,
+            tree: newTree.sha,
+            parents: [headSha]
+        });
+
+        await ghRequest(`${apiBase}/git/refs/heads/${BRANCH}`, 'PATCH', { sha: newCommit.sha });
+
+        if (expandedAudioPath === file.path) expandedAudioPath = newPath;
+        file.name = newName;
+        file.path = newPath;
+
+        showToast(`Renommé en ${newName}.`, '✏️');
+        rebuildFolders();
+    } catch (e) {
+        showToast(`Erreur : ${e.message}`, '❌');
+    } finally {
+        isRenaming = false;
+        updateRenameButton();
+    }
 }
 // Clic sur une miniature : copie le lien (ou coche la case en mode sélection)
 function onTileClick(tile) {
@@ -1911,8 +1985,8 @@ if (currentFilter === 'audio' && file._folder === 'audio') {
                     <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">/${safeFolder}/</span>
                 </div>
                 <div class="flex flex-wrap items-center justify-end gap-2">
-                    <button data-action="copy" data-url="${safeUrl}" class="btn btn-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 h-8 px-2.5">
-                        Copier lien
+                    <button data-action="rename" data-path="${escapeHtml(file.path)}" aria-label="Renommer ${safeName}" class="btn btn-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 h-8 px-2.5">
+                        Renommer
                     </button>
                     <button data-action="download" data-url="${safeUrl}" data-name="${safeName}" aria-label="Télécharger ${safeName}" title="Télécharger" class="btn btn-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700 h-8 px-2.5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
